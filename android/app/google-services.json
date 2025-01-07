@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "252499085967",
+    "project_id": "yourtailor-2dab8",
+    "storage_bucket": "yourtailor-2dab8.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:252499085967:android:e9258ce702cd2d05dc7efa",
+        "android_client_info": {
+          "package_name": "com.example.service_booking_cloudfirestore"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC0ZnsUVOHiFbzFWp23dF6vAeDPB4w-yW4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:252499085967:android:6fc4dc20ea762840dc7efa",
+        "android_client_info": {
+          "package_name": "com.example.yourtailor"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC0ZnsUVOHiFbzFWp23dF6vAeDPB4w-yW4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
