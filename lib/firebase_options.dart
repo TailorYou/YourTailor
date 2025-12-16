@@ -1,7 +1,7 @@
 import 'package:firebase_core/firebase_core.dart'; //show FirebaseOptions;
 
 const DefaultFirebaseOptions = FirebaseOptions(
-  apiKey: "AIzaSyC0ZnsUVOHiFbzFWp23dF6vAeDPB4w-yW4", // Change to your own apikey
+  apiKey: "AIzaSyBklTrO4fkTauPwGD8zHWCIDWxMGwm0wgg", // Change to your own apikey
   appId: "1:252499085967:android:e9258ce702cd2d05dc7efa", // Change to your own appId
   authDomain: "yourtailor-2dab8.firebaseapp.com", // Change to your own authDomain
   projectId: "yourtailor-2dab8", // Change to your own projectId
