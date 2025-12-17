@@ -1,0 +1,14 @@
+services:
+  flutter-builder:
+    build: .
+    volumes:
+      # Maps your code so the APK appears on your real computer
+      - .:/app
+      # Saves Android dependencies so they don't redownload every time
+      - gradle-cache:/root/.gradle
+    working_dir: /app
+    # This is the command that actually builds the APK
+    command: flutter build apk --release --split-per-abi
+
+volumes:
+  gradle-cache:

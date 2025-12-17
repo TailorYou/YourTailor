@@ -1,0 +1,27 @@
+# Flutter build outputs
+build/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# Platform-specific folders (contain symlinks)
+linux/
+windows/
+macos/
+ios/
+web/
+
+# Flutter ephemeral files
+**/ephemeral/
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+*.log
+*.tmp
