@@ -4,6 +4,7 @@ import 'package:yourtailor/page/user/account/user_info_page.dart';
 import 'package:yourtailor/page/user/account/user_page.dart';
 import 'package:yourtailor/page/user/appointment/BookingServiceAppointmentPage.dart';
 import 'package:yourtailor/page/user/appointment/user_appointment/user_appointment_record_menu.dart';
+import 'FAQs/FAQs_screen.dart';
 
 
 class UserDashboard extends StatefulWidget {
@@ -165,6 +166,22 @@ class _UserDashboardState extends State<UserDashboard> {
         unselectedItemColor: Colors.grey,
         onTap: _onItemTapped,
       ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor:Colors.white,
+        onPressed: () {
+          Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const FaqsScreen()),
+                );
+        },
+        child: const Icon(
+          Icons.help,
+          color: Colors.black,
+          size: 42,
+        ),
+      ),
+
+
     );
   }
 
