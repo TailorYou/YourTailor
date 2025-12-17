@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-
 class UpdateTimeScreen extends StatefulWidget {
   const UpdateTimeScreen({super.key});
 
@@ -11,11 +10,37 @@ class UpdateTimeScreen extends StatefulWidget {
 }
 
 class _UpdateTimeScreenState extends State<UpdateTimeScreen> {
-  final _formKey = GlobalKey<FormState>();
   final CollectionReference _appointmentsCollection =
       FirebaseFirestore.instance.collection('appointments');
+
   final TextEditingController _dateController = TextEditingController();
-  final TextEditingController _timeController = TextEditingController();
+
+  // Preset time slots
+  final List<String> presetSlots = [
+    "09:00 AM",
+    "10:00 AM",
+    "11:00 AM",
+    "12:00 PM",
+    "01:00 PM",
+    "02:00 PM",
+    "03:00 PM",
+    "04:00 PM",
+    "05:00 PM",
+    "06:00 PM",
+    "07:00 PM",
+  ];
+
+  // Toggle state map
+  Map<String, bool> selectedSlots = {};
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize all slots as OFF
+    for (var slot in presetSlots) {
+      selectedSlots[slot] = false;
+    }
+  }
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -24,6 +49,7 @@ class _UpdateTimeScreenState extends State<UpdateTimeScreen> {
       firstDate: DateTime(2000),
       lastDate: DateTime(2101),
     );
+
     if (picked != null) {
       setState(() {
         _dateController.text =
@@ -32,32 +58,55 @@ class _UpdateTimeScreenState extends State<UpdateTimeScreen> {
     }
   }
 
-  Future<void> _selectTime(BuildContext context) async {
-    final TimeOfDay? picked = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.now(),
-    );
-    if (picked != null) {
+  Future<void> saveSelectedTimeSlots() async {
+    String selectedDate = _dateController.text.trim();
+
+    if (selectedDate.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please select a date first.")),
+      );
+      return;
+    }
+
+    final chosenSlots =
+        selectedSlots.entries.where((e) => e.value == true).map((e) => e.key);
+
+    if (chosenSlots.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("No time slot selected.")),
+      );
+      return;
+    }
+
+    try {
+      for (var slot in chosenSlots) {
+        await _appointmentsCollection.add({
+          'appointmentDate': selectedDate,
+          'appointmentTime': slot,
+        });
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Time slots saved successfully!")),
+      );
+
+      Navigator.pop(context);
+
+      // Reset toggles
       setState(() {
-        _timeController.text = picked.format(context);
+        selectedSlots.updateAll((key, value) => false);
       });
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to save: $error")),
+      );
     }
   }
 
-  Future<void> addTimeSlot(String appointmentDate, String appointmentTime) async {
-    try {
-      await _appointmentsCollection.add({
-        'appointmentDate': appointmentDate,
-        'appointmentTime': appointmentTime,
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Time slot added successfully!')),
-      );
-    } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to add time slot: $error')),
-      );
-    }
+  void toggleAll(bool value) {
+    setState(() {
+      selectedSlots.updateAll((key, oldValue) => value);
+    });
   }
 
   @override
@@ -76,116 +125,101 @@ class _UpdateTimeScreenState extends State<UpdateTimeScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+          onPressed: () => Navigator.pop(context),
         ),
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1.0),
-          child: Container(
-            color: Colors.black,
-            height: 1.0,
-          ),
+          preferredSize: const Size.fromHeight(1),
+          child: Container(color: Colors.black, height: 1),
         ),
       ),
       body: Container(
         color: const Color(0xFFDFC5B0),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              const SizedBox(height: 20),
-              Center(
-                child: Text(
-                  'YourTailor',
-                  style: GoogleFonts.italiana(
-                    fontSize: 40,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            Text(
+              "YourTailor",
+              style: GoogleFonts.italiana(
+                fontSize: 40, 
+                fontWeight: FontWeight.bold
+              )
+            ),
+
+            const SizedBox(height: 20),
+
+            // DATE FIELD
+            TextFormField(
+              controller: _dateController,
+              readOnly: true,
+              decoration: const InputDecoration(
+                  labelText: "Appointment Date",
+                  border: OutlineInputBorder(),
+                  hintText: "Tap to select date"),
+              onTap: () => _selectDate(context),
+            ),
+
+            const SizedBox(height: 20),
+
+            // TIME TOGGLES FIELD - ONLY SHOW AFTER DATE SELECTED
+            if (_dateController.text.isNotEmpty) ...[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ElevatedButton(
+                    onPressed: () => toggleAll(true),
+                    child: const Text("Enable All On"),
                   ),
-                ),
+                  ElevatedButton(
+                    onPressed: () => toggleAll(false),
+                    child: const Text("Enable All Off"),
+                  ),
+                ],
               ),
-              const SizedBox(height: 20),
+
+              const SizedBox(height: 10),
+
               Expanded(
-                child: SingleChildScrollView(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF2DDCE),
-                      borderRadius: BorderRadius.circular(15.0),
-                    ),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: TextFormField(
-                              controller: _dateController,
-                              readOnly: true,
-                              decoration: const InputDecoration(
-                                labelText: "Appointment Date",
-                                border: OutlineInputBorder(),
-                                hintText: "Tap to select a date",
-                              ),
-                              onTap: () => _selectDate(context),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Please choose a date';
-                                }
-                                return null;
-                              },
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: TextFormField(
-                              controller: _timeController,
-                              readOnly: true,
-                              decoration: const InputDecoration(
-                                labelText: "Appointment Time",
-                                border: OutlineInputBorder(),
-                                hintText: "Tap to select a time",
-                              ),
-                              onTap: () => _selectTime(context),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Please choose a time';
-                                }
-                                return null;
-                              },
-                            ),
-                          ),
-                          ElevatedButton(
-                            onPressed: () {
-                              if (_formKey.currentState!.validate()) {
-                                addTimeSlot(
-                                  _dateController.text,
-                                  _timeController.text,
-                                );
-                                _dateController.clear();
-                                _timeController.clear();
-                              }
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF4A4A4A),
-                            ),
-                            child: Text(
-                              'Add Time Slot',
-                              style: GoogleFonts.judson(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                child: ListView.builder(
+                  itemCount: presetSlots.length,
+                  itemBuilder: (context, index) {
+                    String slot = presetSlots[index];
+                    bool isSelected = selectedSlots[slot] ?? false;
+
+                    return SwitchListTile(
+                      title: Text(slot,
+                          style: const TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.w500)),
+                      value: isSelected,
+                      onChanged: (value) {
+                        setState(() {
+                          selectedSlots[slot] = value;
+                        });
+                      },
+                    );
+                  },
                 ),
               ),
             ],
-          ),
+
+            const SizedBox(height: 20),
+
+            // SAVE BUTTON
+            ElevatedButton(
+              onPressed: saveSelectedTimeSlots,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF4A4A4A),
+                padding:
+                  const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+              ),
+              child: Text(
+                "Add Time Slots",
+                style: GoogleFonts.judson(
+                  fontSize: 18, 
+                  color: Colors.white
+                )
+              ),
+            ),
+          ],
         ),
       ),
     );
